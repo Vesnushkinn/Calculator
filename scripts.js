@@ -19,9 +19,13 @@ function calculate() {
                 if (!isNumber) {
                     if (value === 'AC') {
                         sum.length = 0
-                    } else if (value === 'DEL') {
+                    } else if (value === 'DEL' || value === '=' || value === '0') {
                         ;
-                    } else {
+                    } 
+                    else if (value === '.') {
+                        sum.push("0.")
+                    }
+                    else {
                         sum.push("0", value)
                     };
                 } else {
@@ -31,29 +35,36 @@ function calculate() {
             }
             //если цифра:
             else if (Number(lastValue)) {
-                if (isNumber || value === '.') {
+                if (isNumber || value === '.' || value === '0') {
                     sum[sum.length - 1] += value;
                 } else if (value === 'AC') {
                     sum.length = 0;
                 }
                 else if (value === 'DEL') {
-                    if (sum[sum.length - 1].length === 1 && sum.length === 1) {
+                    if ((sum[sum.length - 1].length === 1 && sum.length === 1) || (sum.length === 1 && sum[0].charAt(0) === "-" && sum[0].length === 2)) {
                         sum.length = 0
                     } else if (sum[sum.length - 1].length === 1 && sum.length > 1) {
                         sum = sum.slice(0, -1)
-                    }
-                    else {
+                    } else {
                         sum[sum.length - 1] = sum[sum.length - 1].slice(0, -1)
                     }
-                }
+                } else if (value === '=') {
+                    if (sum.length === 1) {
+                        total = Number(sum[0])
+                    } else {
+                        renderAmount()
+                    }
+                } 
                 else { sum.push(value); }
                 //цифра и оператор добавляется
             }
             // если оператор
             else if (!Number(lastValue)) {
-                if (isNumber) {
+                if (isNumber && lastValue === "0.") {
+                    sum[0] += value;
+                } else if (isNumber || value === "0") {
                     sum.push(value);
-                }
+                } 
                 else {
                     if (value === 'AC') {
                         sum.length = 0
@@ -63,8 +74,15 @@ function calculate() {
                         if (sum[0] === "0") {
                             sum.length = 0
                         } else {
-                        sum = sum.slice(0, -1)
+                            sum = sum.slice(0, -1)
                         }
+                    }
+                    else if (value === '=') {
+                            renderAmount()
+                    } else if (lastValue === "0." && value === '.') {
+                        ;
+                    } else if (lastValue === "0.") {
+                        sum[0].slice(0, -1) += value
                     }
                     else {
                         sum[sum.length - 1] = value
@@ -145,4 +163,35 @@ function calculateMath(arr) {
     }
     console.log(s)
     console.log(i)
+    if (s.length === 0) {
+        total = 0
+    } else { total = s[0] };
+    resultMath(s);
 }
+
+let total;
+
+function resultMath(arr) {
+    for (i = 0; i < arr.length; i++) {
+        if (i % 2 === 0) {
+            if (arr[i - 1] === "+") {
+                total = total + arr[i]
+            } else if (arr[i - 1] === "-") {
+                total = total - arr[i]
+            }
+        }
+    }
+    console.log(total, "total")
+};
+
+function renderAmount() {
+    sum = [String(total)];
+    if  (sum[0].indexOf('.')) {
+        result.innerHTML = total.toFixed(2)
+    } else { result.innerHTML = total }
+
+}
+
+
+
+/// нужео сделать проверку на наличие точек
